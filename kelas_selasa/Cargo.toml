@@ -1,0 +1,11 @@
+[package]
+name = "kelas_selasa"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+chrono = "0.4.22"
+structopt = "0.3.26"
+thiserror = "1.0.37"
