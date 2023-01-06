@@ -1,16 +1,42 @@
 use actix_web::{get, post, Responder, HttpResponse, HttpServer, App, web, guard};
 use std::sync::Mutex;
 use config::{config, scoped_config};
+use serde::{Deserialize, Serialize};
 // Cara pembuatan route dengan macros
 // #[get("/")]
 // async fn route_hello() -> impl Responder {
 //     HttpResponse::Created().body("Hello world! TEFA")
 // }
 
-#[post("/echo")]
-async fn handler_echo(req_body: String) -> impl Responder {
-    let result = format!("{} BINUS", req_body);
+#[derive(Deserialize)]
+struct TypeAcc {
+    tipe: String,
+    domisili: String
+}
+// extractor Path
+#[get("/echo/{friend_id}/{fav_food}")]
+async fn handler_echo(req_body: String, path: web::Path<(u32, String)>) -> impl Responder {
+    let (friend_id, fav_food) = path.into_inner();
+    let result = format!("{} BINUS, ID = {}, Fav food = {}", req_body, friend_id, fav_food);
     HttpResponse::Ok().body(result)
+}
+//extractor Query
+#[get("/delta")]
+async fn handler_delta(req_body: String, query: web::Query<TypeAcc>) -> impl Responder {
+    let type_acc = &query.tipe;
+    let domisili = &query.domisili;
+    let result = format!("{} BINUS, type account = {}, domisili = {}", req_body, type_acc,domisili);
+    HttpResponse::Ok().body(result)
+}
+#[derive(Deserialize, Serialize)]
+struct InfoInputBody {
+    username: String,
+}
+//extractor body: Json & Url-encoded Form
+#[get("/charlie")]
+async fn handler_charlie(req_body: web::Json<InfoInputBody>) -> impl Responder {
+    let result = InfoInputBody{ username: req_body.username.clone() } ;
+    HttpResponse::Ok().json(result)
 }
 // Cara pembuatan route tidak dengan macros
 async fn route_manual_hello() -> impl Responder {
@@ -81,7 +107,9 @@ async fn main() -> std::io::Result<()> {
             // .service(idx)
             //define di app kalau menggunakan macros
             // .service(route_hello)
-            // .service(handler_echo)
+            .service(handler_echo)
+            .service(handler_delta)
+            .service(handler_charlie)
             // .service(
             //     web::scope("/app")
             //         .service(route_hello)
